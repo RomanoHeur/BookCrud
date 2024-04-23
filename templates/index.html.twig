@@ -1,0 +1,159 @@
+{% extends'base.html.twig' %}
+
+    {% block title %}Home | page {% endblock %}
+
+{% block body %}
+    <div class="container start-50 top-50 position-absolute translate-middle">
+        <div class="row">
+            <div class="col"></div>
+
+            <div class="col text-center">
+                <h1>Books</h1>
+            </div>
+
+            <div class="col text-center">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#create">Add Book</button>
+            </div>
+        </div>
+
+        {% for label, messages in app.flashes %}
+            <div class="alert alert-{{ label }}">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div class="row text-center mt-3">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Author</th>
+                    <th>Title</th>
+                    <th>Genre</th>
+                    <th>Releaseyear</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% if books is not empty %}
+                    {% for book in books %}
+                        <tr class="table-row">
+                            <td>{{ book.author }}</td>
+                            <td>{{ book.title }}</td>
+                            <td>{{ book.genres }}</td>
+                            <td>{{ book.releaseYear }}</td>
+
+                            <td class="text-center">
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editBook-{{ book.id }}"><i class="bi bi-pencil-square"></i></button>
+                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteBook" onclick="verwijderProductId({{ book.id }})"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                {% else %}
+                    <tr>
+                        <td colspan="5"><h4>No book found</h4></td>
+                    </tr>
+                {% endif %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="modal" tabindex="-1" id="create">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="mx-auto">Add Book</h3>
+
+                    <button class="btn" type="button"data-bs-dismiss="modal">
+                        <h4>x</h4>
+                    </button>
+                </div>
+
+                {{ form_start(form, {'attr': {'id': 'form', 'class': 'form-horizontal'}}) }}
+                <div class="modal-body">
+                    {{ form_row(form.author, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_row(form.title, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_row(form.genres, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_row(form.releaseYear, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary mx-auto">Create</button>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    {% for book in books %}
+    <div class="modal" tabindex="-1" id="editBook-{{ book.id }}">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="mx-auto">Edit Book</h3>
+
+                    <button class="btn" type="button"data-bs-dismiss="modal">
+                        <h4>x</h4>
+                    </button>
+                </div>
+
+                {{ form_start(editForm[book.id], {'attr': {'class': 'form-horizontal', 'action': path('edit_book', {'id': book.id})}}) }}
+                <div class="modal-body">
+                    {{ form_row(editForm[book.id].author, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_row(editForm[book.id].title, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_row(editForm[book.id].genres, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_row(editForm[book.id].releaseYear, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary mx-auto">Edit</button>
+                </div>
+                {{ form_end(editForm[book.id]) }}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="modal" tabindex="-1" id="deleteBook">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <form action="{{ path('delete_book', {'id': 'PLACEHOLDER_ID'}) }}" method="post">
+
+                    <div class="modal-header">
+                        <h1 class="mx-auto">Are you sure?</h1>
+                    </div>
+
+                    <input type="hidden" id="verwijderen-id" name="id">
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary ms-auto me-3">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger me-auto" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function verwijderProductId(bookId) {
+            document.getElementById('verwijderen-id').value = bookId;
+            document.querySelector('form[action*="PLACEHOLDER_ID"]').action = '{{ path("delete_book", {"id": "PLACEHOLDER_ID"}) }}'.replace('PLACEHOLDER_ID', bookId);
+        }
+    </script>
+
+{% endblock %}
